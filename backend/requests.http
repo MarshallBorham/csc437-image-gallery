@@ -1,37 +1,93 @@
-### Get all images.  Each request **MUST** be delimited by a triple hash
-# This is a comment
+### Get all images
+GET http://localhost:3000/api/images
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InRlc3R1c2VyIiwiaWF0IjoxNzczNzIwMTEyLCJleHAiOjE3NzM4MDY1MTJ9.v-2im46v60R3L19kiYTV3UGwwzh-1h2coI9OEryUKf4
+
+### Get all images - no token (should 401)
 GET http://localhost:3000/api/images
 
 ### Get one image by ID
 GET http://localhost:3000/api/images/69adff6a8131420b51c935df
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InRlc3R1c2VyIiwiaWF0IjoxNzczNzIwMTEyLCJleHAiOjE3NzM4MDY1MTJ9.v-2im46v60R3L19kiYTV3UGwwzh-1h2coI9OEryUKf4
 
-### Rename an image (success)
-PATCH http://localhost:3000/api/images/PASTE_A_REAL_ID_HERE
+### Rename an image (success - must be owner)
+PATCH http://localhost:3000/api/images/69adff6a8131420b51c935df
 Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImNodW5reWxvdmVyMjMiLCJpYXQiOjE3NzM3MjA3OTAsImV4cCI6MTc3MzgwNzE5MH0.r02iYGP39RUnss6zO6IaREcudgYxLmAfd5_EofMqs7g
 
 { "name": "New Image Name" }
 
-### Rename - bad request (missing name field)
-PATCH http://localhost:3000/api/images/PASTE_A_REAL_ID_HERE
+### Rename - forbidden (not the owner)
+PATCH http://localhost:3000/api/images/69adff6a8131420b51c935df
 Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InRlc3R1c2VyIiwiaWF0IjoxNzczNzIwMTEyLCJleHAiOjE3NzM4MDY1MTJ9.v-2im46v60R3L19kiYTV3UGwwzh-1h2coI9OEryUKf4
+
+{ "name": "Trying to steal this image" }
+
+### Rename - bad request (missing name field)
+PATCH http://localhost:3000/api/images/69adff6a8131420b51c935df
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InRlc3R1c2VyIiwiaWF0IjoxNzczNzIwMTEyLCJleHAiOjE3NzM4MDY1MTJ9.v-2im46v60R3L19kiYTV3UGwwzh-1h2coI9OEryUKf4
 
 { "wrongField": "oops" }
 
 ### Rename - content too large
-PATCH http://localhost:3000/api/images/PASTE_A_REAL_ID_HERE
+PATCH http://localhost:3000/api/images/69adff6a8131420b51c935df
 Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InRlc3R1c2VyIiwiaWF0IjoxNzczNzIwMTEyLCJleHAiOjE3NzM4MDY1MTJ9.v-2im46v60R3L19kiYTV3UGwwzh-1h2coI9OEryUKf4
 
 { "name": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" }
 
 ### Rename - image not found
 PATCH http://localhost:3000/api/images/000000000000000000000000
 Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InRlc3R1c2VyIiwiaWF0IjoxNzczNzIwMTEyLCJleHAiOjE3NzM4MDY1MTJ9.v-2im46v60R3L19kiYTV3UGwwzh-1h2coI9OEryUKf4
 
 { "name": "Ghost Image" }
 
-### A second example.  Each request **MUST** be delimited by a triple hash
-POST http://localhost:3000/api/test
-Content-Type: application/json # Content-Type header is a must if you're sending JSON
-# Request body separated from headers by newline
+### Create a user (success)
+POST http://localhost:3000/api/users
+Content-Type: application/json
 
-{ "a": 1, "b": 2 }
+{ "username": "testuser", "email": "test@example.com", "password": "password123" }
+
+### Create a user - conflict (username already taken)
+POST http://localhost:3000/api/users
+Content-Type: application/json
+
+{ "username": "testuser", "email": "test@example.com", "password": "password123" }
+
+### Create a user - bad request (missing fields)
+POST http://localhost:3000/api/users
+Content-Type: application/json
+
+{ "username": "testuser" }
+
+### Register as chunkylover23 (image owner)
+POST http://localhost:3000/api/users
+Content-Type: application/json
+
+{ "username": "chunkylover23", "email": "chunky@example.com", "password": "password" }
+
+### Login (success)
+POST http://localhost:3000/api/auth/tokens
+Content-Type: application/json
+
+{ "username": "testuser", "password": "password123" }
+
+### Login as chunkylover23
+POST http://localhost:3000/api/auth/tokens
+Content-Type: application/json
+
+{ "username": "chunkylover23", "password": "password" }
+
+### Login - bad request (missing fields)
+POST http://localhost:3000/api/auth/tokens
+Content-Type: application/json
+
+{ "username": "testuser" }
+
+### Login - unauthorized (wrong password)
+POST http://localhost:3000/api/auth/tokens
+Content-Type: application/json
+
+{ "username": "testuser", "password": "wrongpassword" }

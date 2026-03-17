@@ -59,6 +59,21 @@ export function registerImageRoutes(app, imageProvider) {
             });
         }
 
+        const image = await imageProvider.getOneImage(imageId);
+        if (!image) {
+            return res.status(404).send({
+                error: "Not Found",
+                message: "Image does not exist"
+            });
+        }
+
+        if (image.authorId !== req.userInfo.username) {
+            return res.status(403).send({
+                error: "Forbidden",
+                message: "This user does not own this image"
+            });
+        }
+
         const matchedCount = await imageProvider.updateImageName(imageId, name);
         if (matchedCount === 0) {
             return res.status(404).send({
