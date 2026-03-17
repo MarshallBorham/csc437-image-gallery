@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useParams } from "react-router";
 import { ImageNameEditor } from "./ImageNameEditor.jsx";
 
-export function ImageDetails() {
+export function ImageDetails({ authToken }) {
     const { id } = useParams();
     const [image, setImage] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
@@ -11,7 +11,9 @@ export function ImageDetails() {
     useEffect(() => {
         async function doFetch() {
             try {
-                const response = await fetch(`/api/images/${id}`);
+                const response = await fetch(`/api/images/${id}`, {
+                    headers: { "Authorization": `Bearer ${authToken}` }
+                });
                 if (!response.ok) {
                     throw new Error(`Error: HTTP ${response.status} ${response.statusText}`);
                 }
@@ -24,7 +26,7 @@ export function ImageDetails() {
             }
         }
         doFetch();
-    }, [id]);
+    }, [id, authToken]);
 
     function handleNameSaved(newName) {
         setImage({ ...image, name: newName });
@@ -42,6 +44,7 @@ export function ImageDetails() {
                 imageId={id}
                 initialValue={image.name}
                 onNameSaved={handleNameSaved}
+                authToken={authToken}
             />
             <img className="ImageDetails-img" src={image.src} alt={image.name} />
         </>

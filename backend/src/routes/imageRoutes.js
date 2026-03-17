@@ -1,4 +1,5 @@
 import { ObjectId } from "mongodb";
+import { imageMiddlewareFactory, handleImageFileErrors } from "../imageUploadMiddleware.js";
 
 const MAX_NAME_LENGTH = 100;
 
@@ -84,4 +85,25 @@ export function registerImageRoutes(app, imageProvider) {
 
         res.status(204).send();
     });
+
+    app.post(
+        "/api/images",
+        imageMiddlewareFactory.single("image"),
+        handleImageFileErrors,
+        async (req, res) => {
+            if (!req.file || !req.body.name) {
+                return res.status(400).send({
+                    error: "Bad Request",
+                    message: "Missing image file or name"
+                });
+            }
+
+            const src = `/uploads/${req.file.filename}`;
+            const name = req.body.name;
+            const authorId = req.userInfo.username;
+
+            const insertedId = await imageProvider.createImage(src, name, authorId);
+            res.status(201).send({ id: insertedId });
+        }
+    );
 }

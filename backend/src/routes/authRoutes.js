@@ -3,9 +3,7 @@ import { getEnvVar } from "../getEnvVar.js";
 
 function generateAuthToken(username) {
     return new Promise((resolve, reject) => {
-        const payload = {
-            username
-        };
+        const payload = { username };
         jwt.sign(
             payload,
             getEnvVar("JWT_SECRET"),
@@ -37,7 +35,8 @@ export function registerAuthRoutes(app, credentialsProvider) {
             });
         }
 
-        res.status(201).send();
+        const token = await generateAuthToken(username);
+        res.status(201).send({ token });
     });
 
     app.post("/api/auth/tokens", async (req, res) => {
